@@ -26,33 +26,47 @@ namespace PowerPointGenerator
 
         private void button1_Click(object sender, EventArgs e)
         {
-            // If there is nothing in the text body, then none of the below is neccessary
-            if (richTextBox1.Text != "")
+            // If there is nothing in the title and text area, then none of the below work is neccessary
+            if (textBox1.Text != "" && richTextBox1.Text != "")
             {
-                StringBuilder s = new StringBuilder();
+                StringBuilder textAreaString = new StringBuilder();
+                StringBuilder titleAreaString = new StringBuilder();
                 HashSet<String> hs = new HashSet<string>();
 
-                // Build a string without punctuation
+                // Build a string from the text area without punctuation
                 foreach (char c in richTextBox1.Text)
                 {
                     if (!char.IsPunctuation(c))
                     {
-                        s.Append(c);
+                        textAreaString.Append(c);
                     }
                 }
 
-                // Add unique words to a hashset (hashset will only contain unique values)
-                foreach (string stringToParse in s.ToString().Split(' '))
+                // Build a string from the title area without punctuation
+                foreach (char c in textBox1.Text)
+                {
+                    if (!char.IsPunctuation(c))
+                    {
+                        titleAreaString.Append(c);
+                    }
+                }
+
+                // Add words from text area to hashset (note that these will be uinque words due to the nature of a hashset)
+                foreach (string stringToParse in textAreaString.ToString().Split(' '))
                 {
                     hs.Add(stringToParse);
                 }
 
-                Console.WriteLine(textBox1.Text);
+                // Add words from title area to hashset (note that these will be uinque words due to the nature of a hashset)
+                foreach (string stringToParse in titleAreaString.ToString().Split(' '))
+                {
+                    hs.Add(stringToParse);
+                }
 
-/*                foreach (string hsString in hs)
+                foreach (string hsString in hs)
                 {
                     Console.WriteLine(hsString);
-                }*/
+                }
             }
         }
 
