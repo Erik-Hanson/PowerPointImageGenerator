@@ -30,6 +30,7 @@ namespace PowerPointGenerator
         private static int ndx = 0;
         private static int offset = 0;
 
+        // NOTE: IMAGES WILL BE SAVED IN PowerPointGenerator\PowerPointGenerator\bin\Debug at the moment
         private static async Task FindImages()
         {
             try
