@@ -63,10 +63,10 @@ namespace PowerPointGenerator
                     hs.Add(stringToParse);
                 }
 
-                foreach (string hsString in hs)
+/*                foreach (string hsString in hs)
                 {
                     Console.WriteLine(hsString);
-                }
+                }*/
             }
         }
 
