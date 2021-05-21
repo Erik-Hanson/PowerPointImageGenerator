@@ -25,6 +25,8 @@ namespace PowerPointGenerator
         private static string clientIdHeader = null;
         private static HashSet<String> wordSet = new HashSet<string>();
         private static HttpClient client = new HttpClient();
+        private static PictureBox[] pics = new PictureBox[50];
+        private static FlowLayoutPanel[] panel = new FlowLayoutPanel[50];
 
         private static async Task FindImages()
         {
@@ -74,15 +76,32 @@ namespace PowerPointGenerator
             //nextOffset = (int)(long)response["nextOffset"];
 
             var images = response["value"] as Newtonsoft.Json.Linq.JToken;
+            int ndx = 0;
+            int offset = 0;
+
 
             foreach (Newtonsoft.Json.Linq.JToken image in images)
             {
+                panel[ndx] = new FlowLayoutPanel();
+                panel[ndx].Name = "panel" + ndx;
+                panel[ndx].Location = new Point(3, offset);
+                panel[ndx].Size = new Size(317, 122);
+
+                pics[ndx] = new PictureBox();
+                pics[ndx].Location = new Point(953, 95 + offset);
+                pics[ndx].Name = "pic" + ndx;
+                pics[ndx].Size = new Size(300, 75);
+                pics[ndx].ImageLocation = (string)image["thumbnailUrl"];
+                panel[ndx].Controls.Add(pics[ndx]);
+
                 Console.WriteLine("Thumbnail: " + image["thumbnailUrl"]);
                 Console.WriteLine("Thumbnail size: {0} (w) x {1} (h) ", image["thumbnail"]["width"], image["thumbnail"]["height"]);
                 Console.WriteLine("Original image: " + image["contentUrl"]);
                 Console.WriteLine("Original image size: {0} (w) x {1} (h) ", image["width"], image["height"]);
                 Console.WriteLine("Host: {0} ({1})", image["hostPageDomainFriendlyName"], image["hostPageDisplayUrl"]);
                 Console.WriteLine();
+                ndx++;
+                offset += 130;
             }
         }
 
@@ -182,10 +201,11 @@ namespace PowerPointGenerator
 
                 FindImages().Wait();
 
-/*                foreach (string hsString in hs)
+
+                foreach (FlowLayoutPanel flow in panel)
                 {
-                    Console.WriteLine(hsString);
-                }*/
+                    flowLayoutPanel1.Controls.Add(flow);
+                }
             }
         }
 
@@ -206,6 +226,11 @@ namespace PowerPointGenerator
         private void richTextBox1_TextChanged(object sender, EventArgs e)
         {
             richTextBox1.Font = new Font(textBox1.Font, FontStyle.Bold);
+        }
+
+        private void flowLayoutPanel1_Paint(object sender, PaintEventArgs e)
+        {
+
         }
     }
 }
