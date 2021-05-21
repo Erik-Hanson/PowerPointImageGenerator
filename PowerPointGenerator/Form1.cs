@@ -72,7 +72,7 @@ namespace PowerPointGenerator
 
         private void richTextBox1_TextChanged(object sender, EventArgs e)
         {
-
+            richTextBox1.Font = new Font(textBox1.Font, FontStyle.Bold);
         }
     }
 }
