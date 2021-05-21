@@ -26,14 +26,34 @@ namespace PowerPointGenerator
 
         private void button1_Click(object sender, EventArgs e)
         {
-         
-/*            foreach(char c in richTextBox1)
+            // If there is nothing in the text body, then none of the below is neccessary
+            if (richTextBox1.Text != "")
             {
+                StringBuilder s = new StringBuilder();
+                HashSet<String> hs = new HashSet<string>();
 
+                // Build a string without punctuation
+                foreach (char c in richTextBox1.Text)
+                {
+                    if (!char.IsPunctuation(c))
+                    {
+                        s.Append(c);
+                    }
+                }
+
+                // Add unique words to a hashset (hashset will only contain unique values)
+                foreach (string stringToParse in s.ToString().Split(' '))
+                {
+                    hs.Add(stringToParse);
+                }
+
+                Console.WriteLine(textBox1.Text);
+
+/*                foreach (string hsString in hs)
+                {
+                    Console.WriteLine(hsString);
+                }*/
             }
-            string[] splits = richTextBox1.Text.Split(new char[] { ' ', ',' });
-            Console.WriteLine(textBax1.Text);
-            Console.WriteLine(richTextBox1.Text);*/
         }
 
         private void label1_Click(object sender, EventArgs e)
