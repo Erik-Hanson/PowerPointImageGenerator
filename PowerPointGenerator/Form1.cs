@@ -12,6 +12,9 @@ using Microsoft.Azure.CognitiveServices.Search.ImageSearch.Models;
 using System.Net.Http.Headers;
 using System.Net.Http;
 using Newtonsoft.Json;
+using System.IO;
+using System.Net;
+using System.Drawing.Imaging;
 
 namespace PowerPointGenerator
 {
@@ -27,6 +30,7 @@ namespace PowerPointGenerator
         private static HttpClient client = new HttpClient();
         private static PictureBox[] pics = new PictureBox[50];
         private static FlowLayoutPanel[] panel = new FlowLayoutPanel[50];
+        private static List<String> selectedImages = new List<string>();
 
         private static async Task FindImages()
         {
@@ -36,14 +40,10 @@ namespace PowerPointGenerator
 
                 foreach (string word in wordSet) {
                     string queryString = QUERY_PARAMETER + Uri.EscapeDataString(word) + MKT_PARAMETER + "en-us";
-                    //Console.WriteLine(queryString);
-                    //Console.WriteLine("testing");
                     HttpResponseMessage response = await MakeRequestAsync(queryString).ConfigureAwait(false);
-                    //Console.WriteLine("testing");
                     clientIdHeader = response.Headers.GetValues("X-MSEdge-ClientID").FirstOrDefault();
-
                     string contentString = await response.Content.ReadAsStringAsync();
-                    
+
                     Dictionary<string, object> searchResponse = JsonConvert.DeserializeObject<Dictionary<string, object>>(contentString);
 
                     if (response.IsSuccessStatusCode)
@@ -56,7 +56,7 @@ namespace PowerPointGenerator
                     }
                 }
             }
-            catch(Exception e)
+            catch (Exception e)
             {
                 Console.WriteLine(e.Message);
             }
@@ -78,8 +78,7 @@ namespace PowerPointGenerator
             var images = response["value"] as Newtonsoft.Json.Linq.JToken;
             int ndx = 0;
             int offset = 0;
-
-
+            
             foreach (Newtonsoft.Json.Linq.JToken image in images)
             {
                 panel[ndx] = new FlowLayoutPanel();
@@ -87,12 +86,21 @@ namespace PowerPointGenerator
                 panel[ndx].Location = new Point(3, offset);
                 panel[ndx].Size = new Size(317, 122);
 
-                pics[ndx] = new PictureBox();
-                pics[ndx].Location = new Point(953, 95 + offset);
-                pics[ndx].Name = "pic" + ndx;
-                pics[ndx].Size = new Size(300, 75);
-                pics[ndx].ImageLocation = (string)image["thumbnailUrl"];
+                pics[ndx] = new PictureBox
+                {
+                    Location = new Point(953, 95 + offset),
+                    Name = "pic" + ndx,
+                    Size = new Size(300, 75),
+                    ImageLocation = (string)image["thumbnailUrl"]
+                };
                 panel[ndx].Controls.Add(pics[ndx]);
+                string imageUrl = pics[ndx].ImageLocation;
+
+                pics[ndx].Click += (sender, e) =>
+                {
+                    MessageBox.Show("Image Selected");
+                    selectedImages.Add(imageUrl);
+                };
 
                 Console.WriteLine("Thumbnail: " + image["thumbnailUrl"]);
                 Console.WriteLine("Thumbnail size: {0} (w) x {1} (h) ", image["thumbnail"]["width"], image["thumbnail"]["height"]);
@@ -201,11 +209,14 @@ namespace PowerPointGenerator
 
                 FindImages().Wait();
 
-
                 foreach (FlowLayoutPanel flow in panel)
                 {
                     flowLayoutPanel1.Controls.Add(flow);
                 }
+            }
+            else
+            {
+                MessageBox.Show("Enter a title AND text area contents before searching");
             }
         }
 
@@ -231,6 +242,37 @@ namespace PowerPointGenerator
         private void flowLayoutPanel1_Paint(object sender, PaintEventArgs e)
         {
 
+        }
+
+        private void button1_Click_1(object sender, EventArgs e)
+        {
+            if (selectedImages.Count == 0)
+            {
+                MessageBox.Show("No images were selected");
+            }
+            else
+            {
+                int counter = 0;
+                foreach (string s in selectedImages)
+                {
+                    // Credit for below code: https://stackoverflow.com/a/24797557
+                    using (WebClient webClient = new WebClient())
+                    {
+                        byte[] data = webClient.DownloadData(s);
+
+                        using (MemoryStream mem = new MemoryStream(data))
+                        {
+                            using (Image image = Image.FromStream(mem))
+                            {
+                                image.Save("PPTSelectedImage" + counter + ".png", ImageFormat.Png);
+                            }
+                        }
+
+                    }
+                    counter++;
+                }
+                MessageBox.Show("Images downloaded!");
+            }
         }
     }
 }
