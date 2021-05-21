@@ -26,14 +26,48 @@ namespace PowerPointGenerator
 
         private void button1_Click(object sender, EventArgs e)
         {
-         
-/*            foreach(char c in richTextBox1)
+            // If there is nothing in the title and text area, then none of the below work is neccessary
+            if (textBox1.Text != "" && richTextBox1.Text != "")
             {
+                StringBuilder textAreaString = new StringBuilder();
+                StringBuilder titleAreaString = new StringBuilder();
+                HashSet<String> hs = new HashSet<string>();
 
+                // Build a string from the text area without punctuation
+                foreach (char c in richTextBox1.Text)
+                {
+                    if (!char.IsPunctuation(c))
+                    {
+                        textAreaString.Append(c);
+                    }
+                }
+
+                // Build a string from the title area without punctuation
+                foreach (char c in textBox1.Text)
+                {
+                    if (!char.IsPunctuation(c))
+                    {
+                        titleAreaString.Append(c);
+                    }
+                }
+
+                // Add words from text area to hashset (note that these will be uinque words due to the nature of a hashset)
+                foreach (string stringToParse in textAreaString.ToString().Split(' '))
+                {
+                    hs.Add(stringToParse);
+                }
+
+                // Add words from title area to hashset (note that these will be uinque words due to the nature of a hashset)
+                foreach (string stringToParse in titleAreaString.ToString().Split(' '))
+                {
+                    hs.Add(stringToParse);
+                }
+
+/*                foreach (string hsString in hs)
+                {
+                    Console.WriteLine(hsString);
+                }*/
             }
-            string[] splits = richTextBox1.Text.Split(new char[] { ' ', ',' });
-            Console.WriteLine(textBax1.Text);
-            Console.WriteLine(richTextBox1.Text);*/
         }
 
         private void label1_Click(object sender, EventArgs e)
@@ -52,7 +86,7 @@ namespace PowerPointGenerator
 
         private void richTextBox1_TextChanged(object sender, EventArgs e)
         {
-
+            richTextBox1.Font = new Font(textBox1.Font, FontStyle.Bold);
         }
     }
 }
