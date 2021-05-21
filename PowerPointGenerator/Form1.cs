@@ -1,14 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
-using System.ComponentModel;
-using System.Data;
 using System.Drawing;
 using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 using System.Windows.Forms;
-using Microsoft.Azure.CognitiveServices.Search.ImageSearch;
-using Microsoft.Azure.CognitiveServices.Search.ImageSearch.Models;
 using System.Net.Http.Headers;
 using System.Net.Http;
 using Newtonsoft.Json;
@@ -22,15 +18,17 @@ namespace PowerPointGenerator
     {
         private const string QUERY_PARAMETER = "?q=";
         private const string MKT_PARAMETER = "&mkt=";
+        private const string COUNT_PARAMETER = "&count=6";
         private static string apiKey = ""; // REMEMBER TO REMOVE
         private static string baseUri = "https://api.bing.microsoft.com/v7.0/images/search";
-        // private static int nextOffset = 0; May need this for paging through images
         private static string clientIdHeader = null;
         private static HashSet<String> wordSet = new HashSet<string>();
         private static HttpClient client = new HttpClient();
         private static PictureBox[] pics = new PictureBox[50];
         private static FlowLayoutPanel[] panel = new FlowLayoutPanel[50];
         private static List<String> selectedImages = new List<string>();
+        private static int ndx = 0;
+        private static int offset = 0;
 
         private static async Task FindImages()
         {
@@ -39,7 +37,7 @@ namespace PowerPointGenerator
                 client.DefaultRequestHeaders.Add("Ocp-Apim-Subscription-Key", apiKey);
 
                 foreach (string word in wordSet) {
-                    string queryString = QUERY_PARAMETER + Uri.EscapeDataString(word) + MKT_PARAMETER + "en-us";
+                    string queryString = QUERY_PARAMETER + Uri.EscapeDataString(word) + MKT_PARAMETER + "en-us" + COUNT_PARAMETER;
                     HttpResponseMessage response = await MakeRequestAsync(queryString).ConfigureAwait(false);
                     clientIdHeader = response.Headers.GetValues("X-MSEdge-ClientID").FirstOrDefault();
                     string contentString = await response.Content.ReadAsStringAsync();
@@ -60,8 +58,6 @@ namespace PowerPointGenerator
             {
                 Console.WriteLine(e.Message);
             }
-
-            Console.WriteLine("End of images");
         }
 
         static async Task<HttpResponseMessage> MakeRequestAsync(string queryString)
@@ -71,13 +67,8 @@ namespace PowerPointGenerator
 
         static void ListImages(Dictionary<string, object> response)
         {
-            Console.WriteLine("The response contains the following images:\n");
-
-            //nextOffset = (int)(long)response["nextOffset"];
-
             var images = response["value"] as Newtonsoft.Json.Linq.JToken;
-            int ndx = 0;
-            int offset = 0;
+
             
             foreach (Newtonsoft.Json.Linq.JToken image in images)
             {
@@ -91,23 +82,19 @@ namespace PowerPointGenerator
                     Location = new Point(953, 95 + offset),
                     Name = "pic" + ndx,
                     Size = new Size(300, 75),
-                    ImageLocation = (string)image["thumbnailUrl"]
+                    ImageLocation = (string)image["thumbnailUrl"],
+                    SizeMode = PictureBoxSizeMode.Zoom
                 };
                 panel[ndx].Controls.Add(pics[ndx]);
-                string imageUrl = pics[ndx].ImageLocation;
+                PictureBox pic = new PictureBox();
+                pic = pics[ndx];
 
-                pics[ndx].Click += (sender, e) =>
+                pic.Click += (sender, e) =>
                 {
+                    pic.Visible = false;
                     MessageBox.Show("Image Selected");
-                    selectedImages.Add(imageUrl);
+                    selectedImages.Add(pic.ImageLocation);
                 };
-
-                Console.WriteLine("Thumbnail: " + image["thumbnailUrl"]);
-                Console.WriteLine("Thumbnail size: {0} (w) x {1} (h) ", image["thumbnail"]["width"], image["thumbnail"]["height"]);
-                Console.WriteLine("Original image: " + image["contentUrl"]);
-                Console.WriteLine("Original image size: {0} (w) x {1} (h) ", image["width"], image["height"]);
-                Console.WriteLine("Host: {0} ({1})", image["hostPageDomainFriendlyName"], image["hostPageDisplayUrl"]);
-                Console.WriteLine();
                 ndx++;
                 offset += 130;
             }
